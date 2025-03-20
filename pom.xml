@@ -104,6 +104,50 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.9.0</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi.json</inputSpec>
+                            <output>${project.build.directory}/generated-sources</output>
+                            <apiPackage>com.highload.architect.soc.network.api</apiPackage>
+                            <modelPackage>com.highload.architect.soc.network.model</modelPackage>
+                            <supportingFilesToGenerate>
+                                ApiUtil.java
+                            </supportingFilesToGenerate>
+                            <configOptions>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <artifactVersion>${project.version}</artifactVersion>
+<!--                                <delegatePattern>true</delegatePattern>-->
+                                <sourceFolder>swagger</sourceFolder>
+                                <library>spring-boot</library>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useBeanValidation>true</useBeanValidation>
+                                <dateLibrary>java8</dateLibrary>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <java8>true</java8>
+                                <openApiNullable>false</openApiNullable>
+<!--                                <useOptional>true</useOptional>-->
+                                <java17>true</java17> <!-- Поддержка Java 17 -->
+<!--                                <useJakartaEe>true</useJakartaEe> &lt;!&ndash; Использование jakarta вместо javax &ndash;&gt;-->
+<!--                                <useSpringController>true</useSpringController>-->
+                                <useSpringBoot3>true</useSpringBoot3>
+                            </configOptions>
+                            <!-- <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>-->
+                            <!-- <configHelp>true</configHelp>-->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
