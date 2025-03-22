@@ -6,24 +6,24 @@ services:
       - "8080:8080"  # Пробрасываем порт приложения
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mydb
-      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_USERNAME: social_admin
       SPRING_DATASOURCE_PASSWORD: password
-#    depends_on:
-#      - db  # Зависимость от сервиса базы данных
+    depends_on:
+      - db  # Зависимость от сервиса базы данных
 
-#  db:
-#    image: postgres:13  # Используем официальный образ PostgreSQL
-#    environment:
-#      POSTGRES_USER: user
-#      POSTGRES_PASSWORD: password
-#      POSTGRES_DB: mydb
-#    ports:
-#      - "5432:5432"  # Пробрасываем порт базы данных
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data  # Сохраняем данные базы данных
-#
-#volumes:
-#  postgres_data:  # Определяем том для данных PostgreSQL
+  db:
+    image: postgres:16  # Используем официальный образ PostgreSQL
+    environment:
+      POSTGRES_USER: social_admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"  # Пробрасываем порт базы данных
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Сохраняем данные базы данных
+
+volumes:
+  postgres_data:  # Определяем том для данных PostgreSQL
 
 networks:
   app-network:
