@@ -36,14 +36,14 @@ public class UserServiceImpl implements UserService {
         return savedUserInfo.getId();
     }
 
-    private UserInfo buildUserInfo(UserRegisterPostRequest userInfo) {
-        UserInfo user = new UserInfo();
-        user.setBirthdate(userInfo.getBirthdate());
-        user.setBiography(userInfo.getBiography());
-        user.setCity(userInfo.getCity());
-        user.setFirstName(userInfo.getFirstName());
-        user.setSecondName(userInfo.getSecondName());
-        return user;
+    private UserInfo buildUserInfo(UserRegisterPostRequest requestUserInfo) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setBirthdate(requestUserInfo.getBirthdate());
+        userInfo.setBiography(requestUserInfo.getBiography());
+        userInfo.setCity(requestUserInfo.getCity());
+        userInfo.setFirstName(requestUserInfo.getFirstName());
+        userInfo.setSecondName(requestUserInfo.getSecondName());
+        return userInfo;
     }
 
     private AccountInfo buildAccountInfo(UUID accountId, String password) {
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
         return userInfoRepository.findAll();
     }
 
-    public UserInfo createUser(UserInfo user) {
-        return userInfoRepository.save(user);
+    public UserInfo createUser(UserInfo userInfo) {
+        return userInfoRepository.save(userInfo);
     }
 }

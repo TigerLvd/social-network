@@ -29,13 +29,13 @@
         </sql>
     </changeSet>
 
-    <changeSet id="2025-03-22_004" author="LVD">
+    <changeSet id="2025-03-22_004m" author="LVD">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="user" schemaName="social_network"/>
+                <tableExists tableName="user_info" schemaName="social_network"/>
             </not>
         </preConditions>
-        <createTable tableName="user" schemaName="social_network">
+        <createTable tableName="user_info" schemaName="social_network">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -57,13 +57,13 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="2025-03-22_005" author="LVD">
+    <changeSet id="2025-03-22_005m" author="LVD">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="login_post_request" schemaName="social_network"/>
+                <tableExists tableName="account_info" schemaName="social_network"/>
             </not>
         </preConditions>
-        <createTable tableName="login_post_request" schemaName="social_network">
+        <createTable tableName="account_info" schemaName="social_network">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>

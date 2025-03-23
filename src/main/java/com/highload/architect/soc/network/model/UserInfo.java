@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user", schema = "social_network")
+@Table(name = "user_info", schema = "social_network")
 public class UserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

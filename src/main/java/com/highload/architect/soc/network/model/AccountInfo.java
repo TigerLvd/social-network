@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "login_post_request", schema = "social_network")
+@Table(name = "account_info", schema = "social_network")
 public class AccountInfo {
     @Id
     @Column(name = "id", columnDefinition = "UUID")
