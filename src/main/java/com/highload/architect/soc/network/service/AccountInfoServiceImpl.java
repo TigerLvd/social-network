@@ -16,8 +16,7 @@ public class AccountInfoServiceImpl implements AccountInfoService {
 
     @Override
     public boolean existByUserIdAndPassword(String id, String password) {
-        UUID accountId = UUID.fromString(id);
-        AccountInfo accountInfo = accountInfoRepository.findByIdAndPassword(accountId, password);
-        return accountInfo != null;
+        Integer count = accountInfoRepository.countByIdAndPassword(UUID.fromString(id), password);
+        return count > 0;
     }
 }

@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserInfo getById(UUID userId) {
-        return userInfoRepository.getUserInfoById(userId);
+        return userInfoRepository.findUserInfoById(userId);
     }
 
     @Override
@@ -91,13 +91,5 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(userInfo.getFirstName());
         user.setSecondName(userInfo.getSecondName());
         return user;
-    }
-
-    public List<UserInfo> getAllUsers() {
-        return userInfoRepository.findAll();
-    }
-
-    public UserInfo createUser(UserInfo userInfo) {
-        return userInfoRepository.save(userInfo);
     }
 }
