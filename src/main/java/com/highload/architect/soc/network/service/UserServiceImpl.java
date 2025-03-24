@@ -1,6 +1,7 @@
 package com.highload.architect.soc.network.service;
 
-import com.highload.architect.soc.network.model.AccountInfo;
+import com.highload.architect.soc.network.mapper.AccountInfoMapper;
+import com.highload.architect.soc.network.mapper.UserInfoMapper;
 import com.highload.architect.soc.network.model.User;
 import com.highload.architect.soc.network.model.UserInfo;
 import com.highload.architect.soc.network.model.UserRegisterPostRequest;
@@ -16,12 +17,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserInfoRepository userInfoRepository;
+    private final AccountInfoMapper accountInfoMapper;
     private final AccountInfoRepository accountInfoRepository;
+    private final UserInfoMapper userInfoMapper;
+    private final UserInfoRepository userInfoRepository;
 
-    public UserServiceImpl(UserInfoRepository userInfoRepository, AccountInfoRepository accountInfoRepository) {
+    public UserServiceImpl(AccountInfoMapper accountInfoMapper, AccountInfoRepository accountInfoRepository, UserInfoMapper userInfoMapper, UserInfoRepository userInfoRepository) {
+        this.accountInfoMapper = accountInfoMapper;
         this.userInfoRepository = userInfoRepository;
         this.accountInfoRepository = accountInfoRepository;
+        this.userInfoMapper = userInfoMapper;
     }
 
     public UserInfo getById(UUID userId) {
@@ -30,27 +35,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UUID create(UserRegisterPostRequest requestUserInfo) {
-        UserInfo savedUserInfo = userInfoRepository.save(buildUserInfo(requestUserInfo));
-        accountInfoRepository.save(buildAccountInfo(savedUserInfo.getId(), requestUserInfo.getPassword()));
+        UserInfo savedUserInfo = userInfoRepository.save(userInfoMapper.toEntity(requestUserInfo));
+        accountInfoRepository.save(accountInfoMapper.convert(savedUserInfo));
 
         return savedUserInfo.getId();
-    }
-
-    private UserInfo buildUserInfo(UserRegisterPostRequest requestUserInfo) {
-        UserInfo userInfo = new UserInfo();
-        userInfo.setBirthdate(requestUserInfo.getBirthdate());
-        userInfo.setBiography(requestUserInfo.getBiography());
-        userInfo.setCity(requestUserInfo.getCity());
-        userInfo.setFirstName(requestUserInfo.getFirstName());
-        userInfo.setSecondName(requestUserInfo.getSecondName());
-        return userInfo;
-    }
-
-    private AccountInfo buildAccountInfo(UUID accountId, String password) {
-        AccountInfo accountInfo = new AccountInfo();
-        accountInfo.setId(accountId);
-        accountInfo.setPassword(password);
-        return accountInfo;
     }
 
     @Override
@@ -59,7 +47,7 @@ public class UserServiceImpl implements UserService {
         if (userInfo == null) {
             throw new RuntimeException("user not found");
         }
-        return buildUser(userInfo);
+        return userInfoMapper.toDto(userInfo);
     }
 
     @Override
@@ -67,29 +55,7 @@ public class UserServiceImpl implements UserService {
         return Optional.ofNullable(userInfoRepository.findByFirstNameAndSecondName(firstName, lastName))
                 .orElse(Collections.emptyList())
                 .stream()
-                .map(this::convetToUser)
+                .map(userInfoMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    private User convetToUser(UserInfo userInfo) {
-        User user = new User();
-        user.setId(userInfo.getId().toString());
-        user.setBiography(userInfo.getBiography());
-        user.setFirstName(userInfo.getFirstName());
-        user.setSecondName(userInfo.getSecondName());
-        user.setBirthdate(userInfo.getBirthdate());
-        user.setCity(userInfo.getCity());
-        return user;
-    }
-
-    private User buildUser(UserInfo userInfo) {
-        User user = new User();
-        user.setId(userInfo.getId().toString());
-        user.setBirthdate(userInfo.getBirthdate());
-        user.setBiography(userInfo.getBiography());
-        user.setCity(userInfo.getCity());
-        user.setFirstName(userInfo.getFirstName());
-        user.setSecondName(userInfo.getSecondName());
-        return user;
     }
 }

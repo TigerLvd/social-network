@@ -1,6 +1,5 @@
 package com.highload.architect.soc.network.service;
 
-import com.highload.architect.soc.network.model.AccountInfo;
 import com.highload.architect.soc.network.repository.AccountInfoRepository;
 import org.springframework.stereotype.Service;
 
