@@ -1,6 +1,10 @@
 package com.highload.architect.soc.network.service;
 
+import com.highload.architect.soc.network.model.AccountInfo;
+
+import java.util.UUID;
+
 public interface AccountInfoService {
 
-    boolean existByUserIdAndPassword(String id, String password);
+    AccountInfo getById(UUID userId);
 }

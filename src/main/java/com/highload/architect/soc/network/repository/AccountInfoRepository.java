@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.NativeQuery;
 import java.util.UUID;
 
 public interface AccountInfoRepository extends JpaRepository<AccountInfo, UUID> {
-    @NativeQuery("select count(id)\n" +
-            "from mydb.social_network.account_info\n" +
-            "where id = :accountId\n" +
-            "    and password = :password")
-    Integer countByIdAndPassword(UUID accountId, String password);
+
+    @NativeQuery("select * " +
+            "from mydb.social_network.account_info " +
+            "where id = :accountId")
+    AccountInfo getAccountInfoById(UUID accountId);
 }

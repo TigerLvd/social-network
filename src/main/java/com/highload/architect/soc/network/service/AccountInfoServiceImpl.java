@@ -1,5 +1,6 @@
 package com.highload.architect.soc.network.service;
 
+import com.highload.architect.soc.network.model.AccountInfo;
 import com.highload.architect.soc.network.repository.AccountInfoRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +15,7 @@ public class AccountInfoServiceImpl implements AccountInfoService {
     }
 
     @Override
-    public boolean existByUserIdAndPassword(String id, String password) {
-        Integer count = accountInfoRepository.countByIdAndPassword(UUID.fromString(id), password);
-        return count > 0;
+    public AccountInfo getById(UUID userId) {
+        return accountInfoRepository.getAccountInfoById(userId);
     }
 }

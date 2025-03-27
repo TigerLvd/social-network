@@ -72,4 +72,26 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="2025-03-27_001m" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="simple_token" schemaName="social_network"/>
+            </not>
+        </preConditions>
+        <createTable tableName="simple_token" schemaName="social_network">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issued_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiration" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

@@ -14,6 +14,14 @@ public class AccountInfo {
     @Column(name = "password", nullable = false)
     private String password;
 
+    public AccountInfo() {
+    }
+
+    public AccountInfo(UUID id, String password) {
+        this.id = id;
+        this.password = password;
+    }
+
     public UUID getId() {
         return id;
     }

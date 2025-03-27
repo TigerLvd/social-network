@@ -1,12 +1,14 @@
 package com.highload.architect.soc.network.service;
 
-import com.highload.architect.soc.network.mapper.AccountInfoMapper;
 import com.highload.architect.soc.network.mapper.UserInfoMapper;
+import com.highload.architect.soc.network.model.AccountInfo;
 import com.highload.architect.soc.network.model.User;
 import com.highload.architect.soc.network.model.UserInfo;
 import com.highload.architect.soc.network.model.UserRegisterPostRequest;
 import com.highload.architect.soc.network.repository.AccountInfoRepository;
 import com.highload.architect.soc.network.repository.UserInfoRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -17,16 +19,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final AccountInfoMapper accountInfoMapper;
     private final AccountInfoRepository accountInfoRepository;
+    private final PasswordEncoder encoder;
     private final UserInfoMapper userInfoMapper;
     private final UserInfoRepository userInfoRepository;
 
-    public UserServiceImpl(AccountInfoMapper accountInfoMapper, AccountInfoRepository accountInfoRepository, UserInfoMapper userInfoMapper, UserInfoRepository userInfoRepository) {
-        this.accountInfoMapper = accountInfoMapper;
+    public UserServiceImpl(AccountInfoRepository accountInfoRepository, UserInfoMapper userInfoMapper, UserInfoRepository userInfoRepository) {
         this.userInfoRepository = userInfoRepository;
         this.accountInfoRepository = accountInfoRepository;
         this.userInfoMapper = userInfoMapper;
+        this.encoder = new BCryptPasswordEncoder();
     }
 
     public UserInfo getById(UUID userId) {
@@ -36,16 +38,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public UUID create(UserRegisterPostRequest requestUserInfo) {
         UserInfo savedUserInfo = userInfoRepository.save(userInfoMapper.toEntity(requestUserInfo));
-        accountInfoRepository.save(accountInfoMapper.convert(savedUserInfo));
+        String password = requestUserInfo.getPassword();
+        UUID userInfoId = savedUserInfo.getId();
+        AccountInfo accountInfo = new AccountInfo(userInfoId, encoder.encode(password));
+        accountInfoRepository.save(accountInfo);
 
-        return savedUserInfo.getId();
+        return userInfoId;
     }
 
     @Override
     public User getUser(UUID userId) {
         UserInfo userInfo = getById(userId);
         if (userInfo == null) {
-            throw new RuntimeException("user not found");
+            return null;
         }
         return userInfoMapper.toDto(userInfo);
     }

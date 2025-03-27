@@ -21,7 +21,18 @@ public class UserApiImpl implements UserApi {
 
     @Override
     public ResponseEntity<User> userGetIdGet(String id) {
-        User user = userService.getUser(UUID.fromString(id));
+        if (id == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        User user;
+        try {
+            user = userService.getUser(UUID.fromString(id));
+            if (user == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -36,8 +47,16 @@ public class UserApiImpl implements UserApi {
 
     @Override
     public ResponseEntity<List<User>> userSearchGet(String firstName, String lastName) {
-        List<User> users = userService.findByFirstNameAndSecondName(firstName, lastName);
+        if (firstName == null || lastName == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        List<User> users;
+        try {
+            users = userService.findByFirstNameAndSecondName(firstName, lastName);
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
