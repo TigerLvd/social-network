@@ -11,6 +11,6 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, UUID> {
     @NativeQuery("select * from mydb.social_network.user_info where id = :userId")
     UserInfo findUserInfoById(UUID userId);
 
-    @NativeQuery("select * from mydb.social_network.user_info where first_name = :firstName and second_name = :secondName")
+    @NativeQuery("select * from mydb.social_network.user_info where first_name LIKE :firstName || '%' and second_name LIKE :secondName || '%' order by id")
     List<UserInfo> findByFirstNameAndSecondName(String firstName, String secondName);
 }

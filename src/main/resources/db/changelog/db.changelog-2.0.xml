@@ -1,0 +1,100 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="2025-04-05_001" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(id)
+                FROM mydb.social_network.user_info;
+            </sqlCheck>
+        </preConditions>
+        <createProcedure>
+            <![CDATA[
+            DO $$
+            BEGIN
+            FOR i IN 1..(SELECT 1000000 - COUNT(1) FROM mydb.social_network.user_info) LOOP
+                INSERT INTO mydb.social_network.user_info (id, first_name, second_name, birthdate, biography, city)
+                VALUES (
+                           gen_random_uuid(),
+                           (select string_agg(substr('абвгдеёжзийклмнопрстуфхцчшщъыьэюя',
+                                                     (random() * 33)::int + 1, 1), '')
+                            from generate_series(1, 5 + floor(random() * 2)::int)),
+                           (select string_agg(substr('абвгдеёжзийклмнопрстуфхцчшщъыьэюя',
+                                                     (random() * 33)::int + 1, 1), '')
+                            from generate_series(1, 5 + floor(random() * 2)::int)),
+                           date '1950-01-01' + (random() * (date '2000-01-01' - date '1950-01-01')) * INTERVAL '1 day',
+                           (select string_agg(substr('абвгдеёжзийклмнопрстуфхцчшщъыьэюя',
+                                                     (random() * 33)::int + 1, 1), '')
+                            from generate_series(1, 5 + floor(random() * 2)::int)),
+                           (select string_agg(substr('абвгдеёжзийклмнопрстуфхцчшщъыьэюя',
+                                                     (random() * 33)::int + 1, 1), '')
+                            from generate_series(1, 5 + floor(random() * 2)::int))
+                       );
+            END LOOP;
+            END
+$$;
+            ]]>
+        </createProcedure>
+    </changeSet>
+
+    <changeSet id="2025-04-05_002" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM mydb.social_network.user_info ui
+                    LEFT JOIN mydb.social_network.account_info ai ON ui.id = ai.id
+                WHERE ai.id is null
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO mydb.social_network.account_info
+            SELECT ui.ID, '$2a$10$/Kg0dXtx1MpT0VTxwhXPreJK1D9k7xWgzf6X2D8dp5.wDwPJoLXau'
+            FROM mydb.social_network.user_info ui
+                     LEFT JOIN mydb.social_network.account_info ai ON ui.id = ai.id
+            WHERE ai.password is null;
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-04-05_003" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_indexes
+                WHERE schemaname = 'social_network'
+                  AND tablename = 'user_info'
+                  AND indexname = 'idx_user_info_name_composite_btree'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_user_info_name_composite_btree ON mydb.social_network.user_info
+                USING btree (
+                first_name varchar_pattern_ops,
+                second_name varchar_pattern_ops
+                );
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-04-05_004" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_indexes
+                WHERE schemaname = 'social_network'
+                  AND tablename = 'user_info'
+                  AND indexname = 'idx_user_info_name_composite_gin'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+            CREATE INDEX idx_user_info_name_composite_gin ON mydb.social_network.user_info
+                USING gin (
+                first_name gin_trgm_ops,
+                second_name gin_trgm_ops
+                );
+        </sql>
+    </changeSet>
+</databaseChangeLog>
