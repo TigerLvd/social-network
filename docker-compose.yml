@@ -9,6 +9,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mydb
       SPRING_DATASOURCE_USERNAME: social_admin
       SPRING_DATASOURCE_PASSWORD: password
+    links:
+      - db:db
     depends_on:
       - db  # Зависимость от сервиса базы данных
 
@@ -22,6 +24,73 @@ services:
       - "5432:5432"  # Пробрасываем порт базы данных
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Сохраняем данные базы данных
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: monitoring_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./src/main/resources/prometheus/config:/etc/prometheus/
+      - ./src/main/resources/prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    expose:
+      - 9090
+    ports:
+      - 9090:9090
+    links:
+      - app:app
+      - cadvisor:cadvisor
+      - node-exporter:node-exporter
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: monitoring_node_exporter
+    restart: unless-stopped
+    expose:
+      - 9100
+
+  postgres-exporter:
+    image: wrouesnel/postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://social_admin:password@db:5432/mydb?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      - db
+
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: monitoring_cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    expose:
+      - 8080
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: monitoring_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./src/main/resources/grafana/data/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=MYPASSWORT
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=myrul.com
+      - GF_SMTP_ENABLED=false
+#      - GF_SMTP_HOST=smtp.gmail.com:587
+#      - GF_SMTP_USER=myadrress@gmail.com
+#      - GF_SMTP_PASSWORD=mypassword
+#      - GF_SMTP_FROM_ADDRESS=myaddress@gmail.com
 
 volumes:
   postgres_data:  # Определяем том для данных PostgreSQL

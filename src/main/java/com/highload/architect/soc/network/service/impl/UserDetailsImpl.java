@@ -1,4 +1,4 @@
-package com.highload.architect.soc.network.service;
+package com.highload.architect.soc.network.service.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.highload.architect.soc.network.model.AccountInfo;
@@ -26,7 +26,6 @@ public class UserDetailsImpl implements UserDetails {
         this.password = accountInfo.getPassword();
         this.authorities = authorities;
     }
-
 
     public static UserDetailsImpl build(UserInfo userInfo, AccountInfo accountInfo) {
         return new UserDetailsImpl(userInfo, accountInfo, buildGrantedAuthorities());

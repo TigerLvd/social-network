@@ -30,7 +30,7 @@ public class LoginApiImpl implements LoginApi {
     @Override
     public ResponseEntity<LoginPost200Response> loginPost(LoginPostRequest loginPostRequest) {
         UUID userInfoId = UUID.fromString(loginPostRequest.getId());
-        AccountInfo accountInfo = accountInfoService.getById(userInfoId);
+        AccountInfo accountInfo = accountInfoService.getByUserInfoId(userInfoId);
         boolean exist = encoder.matches(loginPostRequest.getPassword(), accountInfo.getPassword());
 
         if (!exist) {

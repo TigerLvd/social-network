@@ -1,10 +1,10 @@
 package com.highload.architect.soc.network.config;
 
 import com.highload.architect.soc.network.exception.ErrorResponseHandler;
-import com.highload.architect.soc.network.repository.AccountInfoRepository;
-import com.highload.architect.soc.network.repository.UserInfoRepository;
 import com.highload.architect.soc.network.security.SimpleTokenProvider;
 import com.highload.architect.soc.network.security.TokenAuthenticationFilter;
+import com.highload.architect.soc.network.service.AccountInfoService;
+import com.highload.architect.soc.network.service.UserService;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,23 +30,24 @@ public class SecurityConfiguration {
     public static final String SIGNIN_ENTRY_POINT = "/login";
     public static final String SIGNUP_ENTRY_POINT = "/user/register";
     public static final String SWAGGER_ENTRY_POINT = "/swagger-ui/**";
+    public static final String ACTUATOR_ENTRY_POINT = "/actuator/**";
     public static final String API_DOCS_ENTRY_POINT = "/v3/api-docs/**";
     public static final String TOKEN_REFRESH_ENTRY_POINT = "/auth/refreshToken";
 
-    private final AccountInfoRepository accountInfoRepository;
+    private final AccountInfoService accountInfoService;
     private final SimpleTokenProvider tokenProvider;
-    private final UserInfoRepository userInfoRepository;
+    private final UserService userService;
 
     private final ErrorResponseHandler accessDeniedHandler;
 
     public SecurityConfiguration(final SimpleTokenProvider tokenProvider,
                                  final ErrorResponseHandler accessDeniedHandler,
-                                 AccountInfoRepository accountInfoRepository,
-                                 UserInfoRepository userInfoRepository) {
+                                 AccountInfoService accountInfoService,
+                                 UserService userService) {
         this.accessDeniedHandler = accessDeniedHandler;
-        this.accountInfoRepository = accountInfoRepository;
+        this.accountInfoService = accountInfoService;
         this.tokenProvider = tokenProvider;
-        this.userInfoRepository = userInfoRepository;
+        this.userService = userService;
     }
 
     @Bean
@@ -74,21 +75,22 @@ public class SecurityConfiguration {
                         .requestMatchers(SIGNIN_ENTRY_POINT).permitAll()
                         .requestMatchers(SIGNUP_ENTRY_POINT).permitAll()
                         .requestMatchers(SWAGGER_ENTRY_POINT).permitAll()
+                        .requestMatchers(ACTUATOR_ENTRY_POINT).permitAll()
                         .requestMatchers(API_DOCS_ENTRY_POINT).permitAll()
                         .requestMatchers(TOKEN_REFRESH_ENTRY_POINT).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
-                        buildTokenAuthenticationFilter(accountInfoRepository, tokenProvider, userInfoRepository),
+                        buildTokenAuthenticationFilter(accountInfoService, tokenProvider, userService),
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    protected TokenAuthenticationFilter buildTokenAuthenticationFilter(final AccountInfoRepository accountInfoRepository,
+    protected TokenAuthenticationFilter buildTokenAuthenticationFilter(final AccountInfoService accountInfoService,
                                                                        final SimpleTokenProvider tokenProvider,
-                                                                       final UserInfoRepository userInfoRepository) {
-        return new TokenAuthenticationFilter(accountInfoRepository, tokenProvider, userInfoRepository);
+                                                                       final UserService userService) {
+        return new TokenAuthenticationFilter(accountInfoService, tokenProvider, userService);
     }
 }

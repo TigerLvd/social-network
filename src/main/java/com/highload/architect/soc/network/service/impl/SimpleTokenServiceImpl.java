@@ -1,25 +1,29 @@
-package com.highload.architect.soc.network.service;
+package com.highload.architect.soc.network.service.impl;
 
+import com.highload.architect.soc.network.dao.SimpleTokenDao;
 import com.highload.architect.soc.network.model.SimpleToken;
-import com.highload.architect.soc.network.repository.SimpleTokenRepository;
+import com.highload.architect.soc.network.service.SimpleTokenService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 public class SimpleTokenServiceImpl implements SimpleTokenService {
-    private final SimpleTokenRepository simpleTokenRepository;
+    private final SimpleTokenDao simpleTokenDao;
 
-    public SimpleTokenServiceImpl(SimpleTokenRepository simpleTokenRepository) {
-        this.simpleTokenRepository = simpleTokenRepository;
+    public SimpleTokenServiceImpl(SimpleTokenDao simpleTokenDao) {
+        this.simpleTokenDao = simpleTokenDao;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public SimpleToken getSimpleTokenById(UUID id) {
-        return simpleTokenRepository.getSimpleTokenById(id);
+        return simpleTokenDao.getById(id);
     }
 
+    @Transactional
     @Override
     public SimpleToken createSimpleToken(UUID userInfoId) {
         SimpleToken simpleToken = new SimpleToken();
@@ -27,7 +31,7 @@ public class SimpleTokenServiceImpl implements SimpleTokenService {
         simpleToken.setExpiration(LocalDateTime.now().plusDays(1));
         simpleToken.setUserId(userInfoId);
 
-        simpleTokenRepository.save(simpleToken);
+        simpleTokenDao.save(simpleToken);
         return simpleToken;
     }
 }

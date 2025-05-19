@@ -3,9 +3,9 @@ package com.highload.architect.soc.network.security;
 import com.highload.architect.soc.network.model.AccountInfo;
 import com.highload.architect.soc.network.model.SimpleToken;
 import com.highload.architect.soc.network.model.UserInfo;
-import com.highload.architect.soc.network.repository.AccountInfoRepository;
-import com.highload.architect.soc.network.repository.UserInfoRepository;
-import com.highload.architect.soc.network.service.UserDetailsImpl;
+import com.highload.architect.soc.network.service.UserService;
+import com.highload.architect.soc.network.service.AccountInfoService;
+import com.highload.architect.soc.network.service.impl.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,16 +18,16 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
+    private final AccountInfoService accountInfoService;
     private final SimpleTokenProvider tokenProvider;
-    private final UserInfoRepository userInfoRepository;
-    private final AccountInfoRepository accountInfoRepository;
+    private final UserService userService;
 
-    public TokenAuthenticationFilter(final AccountInfoRepository accountInfoRepository,
+    public TokenAuthenticationFilter(final AccountInfoService accountInfoService,
                                      final SimpleTokenProvider tokenProvider,
-                                     final UserInfoRepository userInfoRepository) {
-        this.accountInfoRepository = accountInfoRepository;
+                                     final UserService userService) {
+        this.accountInfoService = accountInfoService;
         this.tokenProvider = tokenProvider;
-        this.userInfoRepository = userInfoRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -40,8 +40,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         SimpleToken tokenFromRequest = tokenProvider.getTokenFromRequest(request);
         UUID userId = tokenFromRequest.getUserId();
 
-        UserInfo userInfo = userInfoRepository.findUserInfoById(userId);
-        AccountInfo accountInfo = accountInfoRepository.getAccountInfoById(userId);
+        UserInfo userInfo = userService.getById(userId);
+        AccountInfo accountInfo = accountInfoService.getByUserInfoId(userId);
 
         if (accountInfo != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Создаём аутентификацию и устанавливаем в SecurityContext

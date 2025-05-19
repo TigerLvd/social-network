@@ -1,19 +1,39 @@
-social-network
-    src
-        main
-            java
-                com.highload.architect.soc.network
-                    api
-                        LoginApiImpl.java
-                        UserApiImpl.java
-                    config
-                        OpenApiConfig.java
-                    mapper
-                    service
-                        UserService.java
-                        UserServiceImpl.java
-                    SocialNetworkApplication.java
-            resources
-                application.properties
-                openapi.json
-    pom.xml
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Prometheus ###
+src/main/resources/prometheus/data/
+
+### Grafana ###
+src/main/resources/grafana/
