@@ -41,7 +41,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         UUID userId = tokenFromRequest.getUserId();
 
         UserInfo userInfo = userService.getById(userId);
-        AccountInfo accountInfo = accountInfoService.getByUserInfoId(userId);
+        AccountInfo accountInfo = accountInfoService.getById(userId);
 
         if (accountInfo != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Создаём аутентификацию и устанавливаем в SecurityContext

@@ -18,8 +18,8 @@ public class AccountInfoServiceImpl implements AccountInfoService {
 
     @Transactional(readOnly = true)
     @Override
-    public AccountInfo getByUserInfoId(UUID userId) {
-        return accountInfoDao.getByUserInfoId(userId);
+    public AccountInfo getById(UUID id) {
+        return accountInfoDao.getById(id);
     }
 
     @Transactional

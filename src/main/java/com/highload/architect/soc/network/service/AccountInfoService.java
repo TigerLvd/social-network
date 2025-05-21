@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public interface AccountInfoService {
 
-    AccountInfo getByUserInfoId(UUID userId);
+    AccountInfo getById(UUID userId);
 
     void save(AccountInfo accountInfo);
 }
