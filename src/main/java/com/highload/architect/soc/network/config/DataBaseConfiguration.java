@@ -2,6 +2,8 @@ package com.highload.architect.soc.network.config;
 
 import com.highload.architect.soc.network.config.routingdatasource.ReplicationRoutingDataSource;
 import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,8 @@ import java.util.Properties;
 
 @Configuration
 public class DataBaseConfiguration {
+    private Logger log = LoggerFactory.getLogger(DataBaseConfiguration.class);
+
     @Value("${datasource.driverClassName}")
     private String driverClassName;
 
@@ -29,13 +33,14 @@ public class DataBaseConfiguration {
     @Value("${datasource.password}")
     private String password;
 
-    @Value("${datasource.routing.mode:#{'write_only'}}")
+    @Value("${datasource.routing.mode}")
     private String routingMode;
 
     @Primary
     @Bean
     @DependsOn({"writeDataSource", "readDataSource1", "readDataSource2", "routingDataSource"})
     public DataSource dataSource() {
+        log.info("routingMode={}", routingMode);
         return switch (routingMode) {
             case "routing" -> new LazyConnectionDataSourceProxy(routingDataSource());
             case "write_only" -> writeDataSource();
