@@ -29,11 +29,18 @@ public class DataBaseConfiguration {
     @Value("${datasource.password}")
     private String password;
 
+    @Value("${datasource.routing.mode:#{'write_only'}}")
+    private String routingMode;
+
     @Primary
     @Bean
     @DependsOn({"writeDataSource", "readDataSource1", "readDataSource2", "routingDataSource"})
     public DataSource dataSource() {
-        return new LazyConnectionDataSourceProxy(routingDataSource());
+        return switch (routingMode) {
+            case "routing" -> new LazyConnectionDataSourceProxy(routingDataSource());
+            case "write_only" -> writeDataSource();
+            default -> throw new IllegalArgumentException("Unknown routing mode: " + routingMode);
+        };
     }
 
     @Bean
@@ -92,7 +99,7 @@ public class DataBaseConfiguration {
     @Bean(name = "entityManagerFactory")
     public LocalSessionFactoryBean sessionFactory() {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
+        sessionFactory.setDataSource(writeDataSource());
         sessionFactory.setPackagesToScan("com.highload.architect.soc.network.model");
         sessionFactory.setHibernateProperties(hibernateProperties());
         return sessionFactory;
