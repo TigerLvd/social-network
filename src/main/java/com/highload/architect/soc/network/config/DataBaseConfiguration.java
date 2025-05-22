@@ -104,7 +104,7 @@ public class DataBaseConfiguration {
     @Bean(name = "entityManagerFactory")
     public LocalSessionFactoryBean sessionFactory() {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(writeDataSource());
+        sessionFactory.setDataSource(dataSource());
         sessionFactory.setPackagesToScan("com.highload.architect.soc.network.model");
         sessionFactory.setHibernateProperties(hibernateProperties());
         return sessionFactory;
