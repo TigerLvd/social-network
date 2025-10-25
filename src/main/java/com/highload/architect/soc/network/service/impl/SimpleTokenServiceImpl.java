@@ -1,8 +1,12 @@
 package com.highload.architect.soc.network.service.impl;
 
-import com.highload.architect.soc.network.dao.SimpleTokenDao;
+import com.highload.architect.soc.network.constants.SecurityConstants;
+import com.highload.architect.soc.network.exception.TokenExpiredException;
 import com.highload.architect.soc.network.model.SimpleToken;
+import com.highload.architect.soc.network.repository.SimpleTokenRepository;
 import com.highload.architect.soc.network.service.SimpleTokenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,27 +15,34 @@ import java.util.UUID;
 
 @Service
 public class SimpleTokenServiceImpl implements SimpleTokenService {
-    private final SimpleTokenDao simpleTokenDao;
+    private static final Logger log = LoggerFactory.getLogger(SimpleTokenServiceImpl.class);
+    
+    private final SimpleTokenRepository simpleTokenRepository;
 
-    public SimpleTokenServiceImpl(SimpleTokenDao simpleTokenDao) {
-        this.simpleTokenDao = simpleTokenDao;
+    public SimpleTokenServiceImpl(SimpleTokenRepository simpleTokenRepository) {
+        this.simpleTokenRepository = simpleTokenRepository;
     }
 
     @Transactional(readOnly = true)
     @Override
     public SimpleToken getSimpleTokenById(UUID id) {
-        return simpleTokenDao.getById(id);
+        log.debug("Getting simple token by ID: {}", id);
+        return simpleTokenRepository.findById(id)
+                .orElseThrow(() -> new TokenExpiredException("Token not found with ID: " + id));
     }
 
     @Transactional
     @Override
     public SimpleToken createSimpleToken(UUID userInfoId) {
+        log.info("Creating simple token for user ID: {}", userInfoId);
+        
         SimpleToken simpleToken = new SimpleToken();
         simpleToken.setIssuedAt(LocalDateTime.now());
-        simpleToken.setExpiration(LocalDateTime.now().plusDays(1));
+        simpleToken.setExpiration(LocalDateTime.now().plusDays(SecurityConstants.TOKEN_EXPIRATION_DAYS));
         simpleToken.setUserId(userInfoId);
 
-        simpleTokenDao.save(simpleToken);
-        return simpleToken;
+        SimpleToken savedToken = simpleTokenRepository.save(simpleToken);
+        log.info("Simple token created successfully with ID: {}", savedToken.getId());
+        return savedToken;
     }
 }

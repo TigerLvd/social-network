@@ -1,0 +1,97 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="2025-03-22_001" author="LVD">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS social_network;
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-03-22_002" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_catalog.pg_roles
+                WHERE rolname = 'social_admin'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE USER social_admin WITH PASSWORD 'password';
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-03-22_003" author="LVD">
+        <sql>
+            GRANT ALL PRIVILEGES ON SCHEMA social_network TO social_admin;
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-03-22_004m" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_info" schemaName="social_network"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user_info" schemaName="social_network">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="second_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="birthdate" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="biography" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="city" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2025-03-22_005m" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="account_info" schemaName="social_network"/>
+            </not>
+        </preConditions>
+        <createTable tableName="account_info" schemaName="social_network">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2025-03-27_001m" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="simple_token" schemaName="social_network"/>
+            </not>
+        </preConditions>
+        <createTable tableName="simple_token" schemaName="social_network">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issued_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiration" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

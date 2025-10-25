@@ -1,6 +1,7 @@
 package com.highload.architect.soc.network.service.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.highload.architect.soc.network.constants.UserRole;
 import com.highload.architect.soc.network.model.AccountInfo;
 import com.highload.architect.soc.network.model.UserInfo;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,7 +33,7 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     private static List<GrantedAuthority> buildGrantedAuthorities() {
-        return List.of(new SimpleGrantedAuthority("user"));
+        return List.of(new SimpleGrantedAuthority(UserRole.USER.getAuthority()));
     }
 
     public UUID getId() {
