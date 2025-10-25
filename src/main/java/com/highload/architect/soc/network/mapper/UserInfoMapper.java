@@ -10,5 +10,6 @@ import org.mapstruct.MappingConstants;
 public interface UserInfoMapper {
     User toDto(UserInfo userInfo);
 
+    @org.mapstruct.Mapping(target = "id", ignore = true)
     UserInfo toEntity(UserRegisterPostRequest requestUserInfo);
 }

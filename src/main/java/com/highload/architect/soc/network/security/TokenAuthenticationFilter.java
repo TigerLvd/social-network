@@ -1,5 +1,6 @@
 package com.highload.architect.soc.network.security;
 
+import com.highload.architect.soc.network.constants.SecurityConstants;
 import com.highload.architect.soc.network.model.AccountInfo;
 import com.highload.architect.soc.network.model.SimpleToken;
 import com.highload.architect.soc.network.model.UserInfo;
@@ -32,26 +33,31 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        final String authHeader = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
+        if (authHeader == null || !authHeader.startsWith(SecurityConstants.BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
-        SimpleToken tokenFromRequest = tokenProvider.getTokenFromRequest(request);
-        UUID userId = tokenFromRequest.getUserId();
+        try {
+            SimpleToken tokenFromRequest = tokenProvider.getTokenFromRequest(request);
+            UUID userId = tokenFromRequest.getUserId();
 
-        UserInfo userInfo = userInfoRepository.findUserInfoById(userId);
-        AccountInfo accountInfo = accountInfoRepository.getAccountInfoById(userId);
+            UserInfo userInfo = userInfoRepository.findById(userId).orElse(null);
+            AccountInfo accountInfo = accountInfoRepository.findById(userId).orElse(null);
 
-        if (accountInfo != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Создаём аутентификацию и устанавливаем в SecurityContext
-            UserDetailsImpl userDetails = UserDetailsImpl.build(userInfo, accountInfo);
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (accountInfo != null && userInfo != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // Создаём аутентификацию и устанавливаем в SecurityContext
+                UserDetailsImpl userDetails = UserDetailsImpl.build(userInfo, accountInfo);
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        } catch (Exception e) {
+            // Логируем ошибку и продолжаем выполнение фильтра
+            // Spring Security обработает отсутствие аутентификации
         }
         filterChain.doFilter(request, response);
     }

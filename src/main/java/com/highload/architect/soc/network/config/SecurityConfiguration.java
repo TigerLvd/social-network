@@ -1,5 +1,6 @@
 package com.highload.architect.soc.network.config;
 
+import com.highload.architect.soc.network.constants.SecurityConstants;
 import com.highload.architect.soc.network.exception.ErrorResponseHandler;
 import com.highload.architect.soc.network.repository.AccountInfoRepository;
 import com.highload.architect.soc.network.repository.UserInfoRepository;
@@ -26,12 +27,6 @@ import java.util.List;
 @EnableWebSecurity
 @Order(SecurityProperties.BASIC_AUTH_ORDER)
 public class SecurityConfiguration {
-
-    public static final String SIGNIN_ENTRY_POINT = "/login";
-    public static final String SIGNUP_ENTRY_POINT = "/user/register";
-    public static final String SWAGGER_ENTRY_POINT = "/swagger-ui/**";
-    public static final String API_DOCS_ENTRY_POINT = "/v3/api-docs/**";
-    public static final String TOKEN_REFRESH_ENTRY_POINT = "/auth/refreshToken";
 
     private final AccountInfoRepository accountInfoRepository;
     private final SimpleTokenProvider tokenProvider;
@@ -71,11 +66,11 @@ public class SecurityConfiguration {
                 .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(SIGNIN_ENTRY_POINT).permitAll()
-                        .requestMatchers(SIGNUP_ENTRY_POINT).permitAll()
-                        .requestMatchers(SWAGGER_ENTRY_POINT).permitAll()
-                        .requestMatchers(API_DOCS_ENTRY_POINT).permitAll()
-                        .requestMatchers(TOKEN_REFRESH_ENTRY_POINT).permitAll()
+                        .requestMatchers(SecurityConstants.SIGNIN_ENTRY_POINT).permitAll()
+                        .requestMatchers(SecurityConstants.SIGNUP_ENTRY_POINT).permitAll()
+                        .requestMatchers(SecurityConstants.SWAGGER_ENTRY_POINT).permitAll()
+                        .requestMatchers(SecurityConstants.API_DOCS_ENTRY_POINT).permitAll()
+                        .requestMatchers(SecurityConstants.TOKEN_REFRESH_ENTRY_POINT).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

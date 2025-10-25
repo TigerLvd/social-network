@@ -1,0 +1,17 @@
+swagger/com/highload/architect/soc/network/api/ApiUtil.java
+swagger/com/highload/architect/soc/network/api/DialogApi.java
+swagger/com/highload/architect/soc/network/api/FriendApi.java
+swagger/com/highload/architect/soc/network/api/LoginApi.java
+swagger/com/highload/architect/soc/network/api/PostApi.java
+swagger/com/highload/architect/soc/network/api/UserApi.java
+swagger/com/highload/architect/soc/network/model/DialogMessage.java
+swagger/com/highload/architect/soc/network/model/DialogUserIdSendPostRequest.java
+swagger/com/highload/architect/soc/network/model/LoginPost200Response.java
+swagger/com/highload/architect/soc/network/model/LoginPost500Response.java
+swagger/com/highload/architect/soc/network/model/LoginPostRequest.java
+swagger/com/highload/architect/soc/network/model/Post.java
+swagger/com/highload/architect/soc/network/model/PostCreatePostRequest.java
+swagger/com/highload/architect/soc/network/model/PostUpdatePutRequest.java
+swagger/com/highload/architect/soc/network/model/User.java
+swagger/com/highload/architect/soc/network/model/UserRegisterPost200Response.java
+swagger/com/highload/architect/soc/network/model/UserRegisterPostRequest.java

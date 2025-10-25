@@ -1,5 +1,6 @@
 package com.highload.architect.soc.network.security;
 
+import com.highload.architect.soc.network.constants.SecurityConstants;
 import com.highload.architect.soc.network.model.SimpleToken;
 import com.highload.architect.soc.network.service.SimpleTokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,8 +13,6 @@ import java.util.UUID;
 
 @Component
 public class SimpleTokenProvider {
-    public static final String HEADER = "Authorization";
-    public static final String HEADER_PREFIX = "Bearer ";
 
     static {
         LoggerFactory.getLogger(SimpleTokenProvider.class);
@@ -26,14 +25,14 @@ public class SimpleTokenProvider {
     }
 
     public SimpleToken getTokenFromRequest(final HttpServletRequest request) {
-        String header = request.getHeader(HEADER);
+        String header = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
         if (org.apache.commons.lang3.StringUtils.isBlank(header)) {
             throw new AuthenticationServiceException("Authorization header cannot be blank!");
         }
-        if (header.length() < HEADER_PREFIX.length()) {
+        if (header.length() < SecurityConstants.BEARER_PREFIX.length()) {
             throw new AuthenticationServiceException("Invalid authorization header size.");
         }
-        String token = header.substring(HEADER_PREFIX.length());
+        String token = header.substring(SecurityConstants.BEARER_PREFIX.length());
 
         SimpleToken simpleToken = simpleTokenService.getSimpleTokenById(UUID.fromString(token));
         if (simpleToken == null) {
