@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import java.util.UUID;
 
 @RestController
@@ -33,7 +34,7 @@ public class LoginApiImpl implements LoginApi {
     }
 
     @Override
-    public ResponseEntity<LoginPost200Response> loginPost(LoginPostRequest loginPostRequest) {
+    public ResponseEntity<LoginPost200Response> loginPost(@Valid LoginPostRequest loginPostRequest) {
         log.info("Login attempt for user ID: {}", loginPostRequest.getId());
         
         try {
@@ -60,10 +61,11 @@ public class LoginApiImpl implements LoginApi {
             return ResponseEntity.badRequest().build();
         } catch (InvalidCredentialsException e) {
             log.warn("Invalid credentials: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             log.error("Error during login", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            // Return 503 for service unavailable instead of 500
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
     }
 }

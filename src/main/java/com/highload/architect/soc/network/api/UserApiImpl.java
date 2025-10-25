@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,12 +46,12 @@ public class UserApiImpl implements UserApi {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             log.error("Error getting user with ID: {}", id, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
     }
 
     @Override
-    public ResponseEntity<UserRegisterPost200Response> userRegisterPost(UserRegisterPostRequest userRegisterPostRequest) {
+    public ResponseEntity<UserRegisterPost200Response> userRegisterPost(@Valid UserRegisterPostRequest userRegisterPostRequest) {
         log.info("Registering new user: {} {}", 
                 userRegisterPostRequest.getFirstName(), userRegisterPostRequest.getSecondName());
         
@@ -64,7 +65,7 @@ public class UserApiImpl implements UserApi {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error registering user", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
     }
 
@@ -84,7 +85,7 @@ public class UserApiImpl implements UserApi {
             return ResponseEntity.ok(users);
         } catch (Exception e) {
             log.error("Error searching users", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
     }
 }
