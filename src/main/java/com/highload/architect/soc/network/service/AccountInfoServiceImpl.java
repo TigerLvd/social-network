@@ -25,4 +25,10 @@ public class AccountInfoServiceImpl implements AccountInfoService {
         return accountInfoRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Account not found with ID: " + userId));
     }
+
+    @Override
+    public void save(AccountInfo accountInfo) {
+        log.debug("Saving account info with ID: {}", accountInfo.getId());
+        accountInfoRepository.save(accountInfo);
+    }
 }
