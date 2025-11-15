@@ -81,3 +81,4 @@ public class LoginPost200Response {
     return o.toString().replace("\n", "\n    ");
   }
 }
+

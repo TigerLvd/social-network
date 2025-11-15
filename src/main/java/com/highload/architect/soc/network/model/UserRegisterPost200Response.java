@@ -81,3 +81,4 @@ public class UserRegisterPost200Response {
     return o.toString().replace("\n", "\n    ");
   }
 }
+

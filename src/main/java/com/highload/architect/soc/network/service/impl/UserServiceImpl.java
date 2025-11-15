@@ -26,18 +26,18 @@ public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     
     private final AccountInfoRepository accountInfoRepository;
-    private final PasswordEncoder encoder;
+    private final PasswordEncoder passwordEncoder;
     private final UserInfoMapper userInfoMapper;
     private final UserInfoRepository userInfoRepository;
 
     public UserServiceImpl(AccountInfoRepository accountInfoRepository, 
                           UserInfoMapper userInfoMapper, 
                           UserInfoRepository userInfoRepository,
-                          PasswordEncoder encoder) {
+                          PasswordEncoder passwordEncoder) {
         this.userInfoRepository = userInfoRepository;
         this.accountInfoRepository = accountInfoRepository;
         this.userInfoMapper = userInfoMapper;
-        this.encoder = encoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
         UserInfo savedUserInfo = userInfoRepository.save(userInfoMapper.toEntity(requestUserInfo));
         String password = requestUserInfo.getPassword();
         UUID userInfoId = savedUserInfo.getId();
-        AccountInfo accountInfo = new AccountInfo(userInfoId, encoder.encode(password));
+        AccountInfo accountInfo = new AccountInfo(userInfoId, passwordEncoder.encode(password));
         accountInfoRepository.save(accountInfo);
 
         log.info("User created successfully with ID: {}", userInfoId);

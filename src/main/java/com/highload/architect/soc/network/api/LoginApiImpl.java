@@ -22,15 +22,15 @@ public class LoginApiImpl implements LoginApi {
     private static final Logger log = LoggerFactory.getLogger(LoginApiImpl.class);
     
     private final AccountInfoService accountInfoService;
-    private final PasswordEncoder encoder;
+    private final PasswordEncoder passwordEncoder;
     private final SimpleTokenService simpleTokenService;
 
     public LoginApiImpl(AccountInfoService accountInfoService, 
                        SimpleTokenService simpleTokenService,
-                       PasswordEncoder encoder) {
+                       PasswordEncoder passwordEncoder) {
         this.accountInfoService = accountInfoService;
         this.simpleTokenService = simpleTokenService;
-        this.encoder = encoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class LoginApiImpl implements LoginApi {
             UUID userInfoId = UUID.fromString(loginPostRequest.getId());
             AccountInfo accountInfo = accountInfoService.getById(userInfoId);
             
-            boolean passwordMatches = encoder.matches(loginPostRequest.getPassword(), accountInfo.getPassword());
+            boolean passwordMatches = passwordEncoder.matches(loginPostRequest.getPassword(), accountInfo.getPassword());
             
             if (!passwordMatches) {
                 log.warn("Invalid credentials for user ID: {}", userInfoId);
