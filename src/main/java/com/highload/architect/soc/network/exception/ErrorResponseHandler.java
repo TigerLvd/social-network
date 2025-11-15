@@ -1,5 +1,6 @@
 package com.highload.architect.soc.network.exception;
 
+import com.highload.architect.soc.network.exception.FriendshipRequiredException;
 import com.highload.architect.soc.network.utils.JsonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +31,9 @@ public class ErrorResponseHandler implements AccessDeniedHandler {
             return;
         }
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        if (exception instanceof AuthenticationException) {
+        if (exception instanceof FriendshipRequiredException) {
+            handleFriendshipRequiredException((FriendshipRequiredException) exception, response);
+        } else if (exception instanceof AuthenticationException) {
             handleAuthenticationException((AuthenticationException) exception, response);
         } else {
             handleInternalServerError(exception, response);
@@ -60,6 +63,13 @@ public class ErrorResponseHandler implements AccessDeniedHandler {
             JsonUtils.writeValue(getWriter(response),
                     ErrorResponse.of("exception.authenticationFailed", ErrorCode.AUTHENTICATION));
         }
+    }
+
+    private static void handleFriendshipRequiredException(final FriendshipRequiredException exception,
+                                                         final HttpServletResponse response) {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        JsonUtils.writeValue(getWriter(response),
+                ErrorResponse.of("exception.friendshipRequired", ErrorCode.FRIENDSHIP_REQUIRED));
     }
 
     @Override

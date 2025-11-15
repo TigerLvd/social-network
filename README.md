@@ -311,6 +311,3 @@ avg by(uri) (http_server_requests_seconds_count{job="spring-boot-app"})
 ## Документация
 - [Спецификация OpenAPI](src/main/resources/openapi.json)
 - [Swagger UI](http://localhost:8080/swagger-ui.html) - интерактивная документация
-
-## Автор
-Учебный проект OTUS - Highload Architect
