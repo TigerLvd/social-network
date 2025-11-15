@@ -1,0 +1,144 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="2025-11-16_001" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="friendship" schemaName="social_network"/>
+            </not>
+        </preConditions>
+        <createTable tableName="friendship" schemaName="social_network">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="friend_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2025-11-16_002" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_indexes
+                WHERE schemaname = 'social_network'
+                  AND tablename = 'friendship'
+                  AND indexname = 'idx_friendship_unique'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE UNIQUE INDEX idx_friendship_unique ON social_network.friendship (user_id, friend_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-11-16_003" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_indexes
+                WHERE schemaname = 'social_network'
+                  AND tablename = 'friendship'
+                  AND indexname = 'idx_user_friends'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_user_friends ON social_network.friendship (user_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-11-16_004" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_indexes
+                WHERE schemaname = 'social_network'
+                  AND tablename = 'friendship'
+                  AND indexname = 'idx_friend'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_friend ON social_network.friendship (friend_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-11-16_005" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dialog_message" schemaName="social_network"/>
+            </not>
+        </preConditions>
+        <createTable tableName="dialog_message" schemaName="social_network">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="from_user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="to_user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2025-11-16_006" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_indexes
+                WHERE schemaname = 'social_network'
+                  AND tablename = 'dialog_message'
+                  AND indexname = 'idx_dialog_users'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_dialog_users ON social_network.dialog_message (from_user_id, to_user_id, created_at DESC);
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-11-16_007" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_indexes
+                WHERE schemaname = 'social_network'
+                  AND tablename = 'dialog_message'
+                  AND indexname = 'idx_to_user'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_to_user ON social_network.dialog_message (to_user_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-11-16_008" author="LVD">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_indexes
+                WHERE schemaname = 'social_network'
+                  AND tablename = 'dialog_message'
+                  AND indexname = 'idx_from_user'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_from_user ON social_network.dialog_message (from_user_id);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
