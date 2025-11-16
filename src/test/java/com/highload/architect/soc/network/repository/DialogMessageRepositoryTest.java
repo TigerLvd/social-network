@@ -2,29 +2,34 @@ package com.highload.architect.soc.network.repository;
 
 import com.highload.architect.soc.network.model.DialogMessageEntity;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
+@EntityScan(basePackages = "com.highload.architect.soc.network.model")
+@TestPropertySource(properties = {
+    "spring.datasource.url=jdbc:h2:mem:testdb",
+    "spring.datasource.driver-class-name=org.h2.Driver",
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+    "spring.liquibase.enabled=false"
+})
 class DialogMessageRepositoryTest {
 
-    @Mock
+    @Autowired
     private DialogMessageRepository dialogMessageRepository;
 
     private final UUID user1Id = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
@@ -34,10 +39,6 @@ class DialogMessageRepositoryTest {
     void save_ShouldSaveMessage() {
         // Arrange
         DialogMessageEntity message = createTestMessage(user1Id, user2Id, "Test message");
-        DialogMessageEntity savedMessage = createTestMessage(user1Id, user2Id, "Test message");
-        savedMessage.setId(UUID.randomUUID());
-
-        when(dialogMessageRepository.save(message)).thenReturn(savedMessage);
 
         // Act
         DialogMessageEntity result = dialogMessageRepository.save(message);
@@ -53,17 +54,11 @@ class DialogMessageRepositoryTest {
     @Test
     void findByUsersPaged_ShouldReturnMessagesBetweenUsers() {
         // Arrange
-        List<DialogMessageEntity> mockMessages = List.of(
-            createTestMessage(user1Id, user2Id, "Message 1"),
-            createTestMessage(user2Id, user1Id, "Message 2"),
-            createTestMessage(user1Id, user2Id, "Message 3")
-        );
+        dialogMessageRepository.save(createTestMessage(user1Id, user2Id, "Message 1"));
+        dialogMessageRepository.save(createTestMessage(user2Id, user1Id, "Message 2"));
+        dialogMessageRepository.save(createTestMessage(user1Id, user2Id, "Message 3"));
 
-        Page<DialogMessageEntity> mockPage = new PageImpl<>(mockMessages);
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        when(dialogMessageRepository.findByUsersPaged(eq(user1Id), eq(user2Id), any(Pageable.class)))
-            .thenReturn(mockPage);
 
         // Act
         Page<DialogMessageEntity> result = dialogMessageRepository.findByUsersPaged(user1Id, user2Id, pageable);
@@ -71,9 +66,13 @@ class DialogMessageRepositoryTest {
         // Assert
         assertEquals(3, result.getTotalElements());
         assertEquals(3, result.getContent().size());
-        assertEquals("Message 1", result.getContent().get(0).getText());
-        assertEquals("Message 2", result.getContent().get(1).getText());
-        assertEquals("Message 3", result.getContent().get(2).getText());
+        // Check that all expected messages are present (order may vary due to same timestamps)
+        List<String> texts = result.getContent().stream()
+            .map(DialogMessageEntity::getText)
+            .collect(Collectors.toList());
+        assertTrue(texts.contains("Message 1"));
+        assertTrue(texts.contains("Message 2"));
+        assertTrue(texts.contains("Message 3"));
     }
 
     @Test
@@ -81,15 +80,10 @@ class DialogMessageRepositoryTest {
         // Arrange
         UUID user3Id = UUID.fromString("123e4567-e89b-12d3-a456-426614174002");
 
-        List<DialogMessageEntity> mockMessages = List.of(
-            createTestMessage(user1Id, user2Id, "Between user1 and user2")
-        );
+        dialogMessageRepository.save(createTestMessage(user1Id, user2Id, "Between user1 and user2"));
+        dialogMessageRepository.save(createTestMessage(user1Id, user3Id, "Between user1 and user3"));
 
-        Page<DialogMessageEntity> mockPage = new PageImpl<>(mockMessages);
         Pageable pageable = PageRequest.of(0, 10);
-
-        when(dialogMessageRepository.findByUsersPaged(eq(user1Id), eq(user2Id), any(Pageable.class)))
-            .thenReturn(mockPage);
 
         // Act
         Page<DialogMessageEntity> result = dialogMessageRepository.findByUsersPaged(user1Id, user2Id, pageable);
@@ -102,16 +96,13 @@ class DialogMessageRepositoryTest {
     @Test
     void findByUsersPaged_ShouldSupportPagination() {
         // Arrange
-        List<DialogMessageEntity> mockMessages = List.of(
-            createTestMessage(user1Id, user2Id, "Message 1"),
-            createTestMessage(user1Id, user2Id, "Message 2")
-        );
+        dialogMessageRepository.save(createTestMessage(user1Id, user2Id, "Message 1"));
+        dialogMessageRepository.save(createTestMessage(user1Id, user2Id, "Message 2"));
+        dialogMessageRepository.save(createTestMessage(user1Id, user2Id, "Message 3"));
+        dialogMessageRepository.save(createTestMessage(user1Id, user2Id, "Message 4"));
+        dialogMessageRepository.save(createTestMessage(user1Id, user2Id, "Message 5"));
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<DialogMessageEntity> mockPage = new PageImpl<>(mockMessages, pageable, 5);
-
-        when(dialogMessageRepository.findByUsersPaged(eq(user1Id), eq(user2Id), eq(pageable)))
-            .thenReturn(mockPage);
 
         // Act
         Page<DialogMessageEntity> result = dialogMessageRepository.findByUsersPaged(user1Id, user2Id, pageable);

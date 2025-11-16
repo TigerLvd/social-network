@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "dialog_message", schema = "social_network")
+@Table(name = "dialog_message")
 public class DialogMessageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
