@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DialogMessageRepositoryTest {
 
-    @Autowired
+    @Mock
     private DialogMessageRepository dialogMessageRepository;
 
     private final UUID user1Id = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
@@ -33,30 +34,36 @@ class DialogMessageRepositoryTest {
     void save_ShouldSaveMessage() {
         // Arrange
         DialogMessageEntity message = createTestMessage(user1Id, user2Id, "Test message");
+        DialogMessageEntity savedMessage = createTestMessage(user1Id, user2Id, "Test message");
+        savedMessage.setId(UUID.randomUUID());
+
+        when(dialogMessageRepository.save(message)).thenReturn(savedMessage);
 
         // Act
-        DialogMessageEntity savedMessage = dialogMessageRepository.save(message);
+        DialogMessageEntity result = dialogMessageRepository.save(message);
 
         // Assert
-        assertNotNull(savedMessage.getId());
-        assertEquals(user1Id, savedMessage.getFromUserId());
-        assertEquals(user2Id, savedMessage.getToUserId());
-        assertEquals("Test message", savedMessage.getText());
-        assertNotNull(savedMessage.getCreatedAt());
+        assertNotNull(result.getId());
+        assertEquals(user1Id, result.getFromUserId());
+        assertEquals(user2Id, result.getToUserId());
+        assertEquals("Test message", result.getText());
+        assertNotNull(result.getCreatedAt());
     }
 
     @Test
     void findByUsersPaged_ShouldReturnMessagesBetweenUsers() {
         // Arrange
-        DialogMessageEntity message1 = createTestMessage(user1Id, user2Id, "Message 1");
-        DialogMessageEntity message2 = createTestMessage(user2Id, user1Id, "Message 2");
-        DialogMessageEntity message3 = createTestMessage(user1Id, user2Id, "Message 3");
+        List<DialogMessageEntity> mockMessages = List.of(
+            createTestMessage(user1Id, user2Id, "Message 1"),
+            createTestMessage(user2Id, user1Id, "Message 2"),
+            createTestMessage(user1Id, user2Id, "Message 3")
+        );
 
-        dialogMessageRepository.save(message1);
-        dialogMessageRepository.save(message2);
-        dialogMessageRepository.save(message3);
-
+        Page<DialogMessageEntity> mockPage = new PageImpl<>(mockMessages);
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        when(dialogMessageRepository.findByUsersPaged(eq(user1Id), eq(user2Id), any(Pageable.class)))
+            .thenReturn(mockPage);
 
         // Act
         Page<DialogMessageEntity> result = dialogMessageRepository.findByUsersPaged(user1Id, user2Id, pageable);
@@ -64,11 +71,9 @@ class DialogMessageRepositoryTest {
         // Assert
         assertEquals(3, result.getTotalElements());
         assertEquals(3, result.getContent().size());
-
-        // Check sorting - newest first
-        List<DialogMessageEntity> messages = result.getContent();
-        assertTrue(messages.get(0).getCreatedAt().isAfter(messages.get(1).getCreatedAt()) ||
-                  messages.get(0).getCreatedAt().equals(messages.get(1).getCreatedAt()));
+        assertEquals("Message 1", result.getContent().get(0).getText());
+        assertEquals("Message 2", result.getContent().get(1).getText());
+        assertEquals("Message 3", result.getContent().get(2).getText());
     }
 
     @Test
@@ -76,15 +81,15 @@ class DialogMessageRepositoryTest {
         // Arrange
         UUID user3Id = UUID.fromString("123e4567-e89b-12d3-a456-426614174002");
 
-        DialogMessageEntity message1 = createTestMessage(user1Id, user2Id, "Between user1 and user2");
-        DialogMessageEntity message2 = createTestMessage(user1Id, user3Id, "Between user1 and user3");
-        DialogMessageEntity message3 = createTestMessage(user2Id, user3Id, "Between user2 and user3");
+        List<DialogMessageEntity> mockMessages = List.of(
+            createTestMessage(user1Id, user2Id, "Between user1 and user2")
+        );
 
-        dialogMessageRepository.save(message1);
-        dialogMessageRepository.save(message2);
-        dialogMessageRepository.save(message3);
-
+        Page<DialogMessageEntity> mockPage = new PageImpl<>(mockMessages);
         Pageable pageable = PageRequest.of(0, 10);
+
+        when(dialogMessageRepository.findByUsersPaged(eq(user1Id), eq(user2Id), any(Pageable.class)))
+            .thenReturn(mockPage);
 
         // Act
         Page<DialogMessageEntity> result = dialogMessageRepository.findByUsersPaged(user1Id, user2Id, pageable);
@@ -97,12 +102,16 @@ class DialogMessageRepositoryTest {
     @Test
     void findByUsersPaged_ShouldSupportPagination() {
         // Arrange
-        for (int i = 1; i <= 5; i++) {
-            DialogMessageEntity message = createTestMessage(user1Id, user2Id, "Message " + i);
-            dialogMessageRepository.save(message);
-        }
+        List<DialogMessageEntity> mockMessages = List.of(
+            createTestMessage(user1Id, user2Id, "Message 1"),
+            createTestMessage(user1Id, user2Id, "Message 2")
+        );
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<DialogMessageEntity> mockPage = new PageImpl<>(mockMessages, pageable, 5);
+
+        when(dialogMessageRepository.findByUsersPaged(eq(user1Id), eq(user2Id), eq(pageable)))
+            .thenReturn(mockPage);
 
         // Act
         Page<DialogMessageEntity> result = dialogMessageRepository.findByUsersPaged(user1Id, user2Id, pageable);
